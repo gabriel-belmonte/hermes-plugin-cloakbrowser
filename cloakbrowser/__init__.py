@@ -114,6 +114,14 @@ def _run_ab(args: list[str], timeout: int = 60) -> Dict[str, Any]:
 
 def _navigate(params: Dict[str, Any], **kwargs: Any) -> str:
     del kwargs
+    # LIMITATION: this plugin drives CloakBrowser over CDP via `cloakserve`,
+    # which only honours seed/proxy/timezone/locale through the CDP query
+    # string. The `humanize=True` behavioral flag (and thus clearing active
+    # Cloudflare Turnstile challenges) lives in the Python/JS `launch()` API,
+    # not the CDP server. On a datacenter IP (like this VPS) Turnstile blocks
+    # by design regardless of fingerprint quality — a residential proxy is
+    # required. Fingerprint/automation detection (e.g. bot.sannysoft.com) is
+    # defeated; active challenges are not, at this layer.
     url = params.get("url")
     if not url:
         return json.dumps({"success": False, "error": "missing url"})
