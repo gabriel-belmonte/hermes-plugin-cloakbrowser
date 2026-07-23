@@ -64,12 +64,23 @@ Now `browser_navigate`, `browser_click`, `browser_snapshot`, … all run on the 
 | Test | Target | Result |
 |------|--------|--------|
 | Fingerprint detection | `bot.sannysoft.com` | ✅ **All checks pass** — `WebDriver: missing (passed)`, no Phantom/Selenium flags, real `NVIDIA RTX 3080` WebGL, normal UA `Chrome/146 (Windows 10)` |
-| Cloudflare Turnstile | `nowsecure.nl` | ⚠️ Page loads (no 403 block) but the **"Verify you are human" challenge iframe appears** — manual solve or `humanize=True` + a residential proxy is required to clear Turnstile automatically |
+| Cloudflare Turnstile | `nowsecure.nl` | ⚠️ Page loads (no 403 block) but the **"Verify you are human" challenge iframe appears** |
 
 **Bottom line:** CloakBrowser defeats fingerprint/automation detection (the part
 that normally burns a bot instantly). Active challenges like Cloudflare
-Turnstile still need human-like interaction — set `humanize=True` and route
-through a residential proxy on the `cloakserve` launch flags for those.
+Turnstile still need two things this plugin's default setup does not provide:
+
+1. **A residential proxy** — the VPS runs on a datacenter IP, and Cloudflare
+   Turnstile blocks those by design regardless of fingerprint quality.
+2. **`humanize=True`** — human-like mouse/keyboard/scroll. This is a flag of the
+   Python/JS `cloakbrowser.launch()` API, *not* of the `cloakserve` CDP server.
+   The server only honours seed/proxy/timezone/locale via the CDP query string
+   (`http://host:9222?fingerprint=<seed>&proxy=<residential>&geoip=True`).
+
+To clear Turnstile you must run a CloakBrowser instance launched with a
+residential proxy + `humanize=True` (see the CloakBrowser README), then point
+`CLOAKBROWSER_URL` at it. This plugin's `cloak_browser` tool then drives it over
+CDP like any other target.
 
 ## Config
 
