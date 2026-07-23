@@ -1,12 +1,13 @@
 services:
   cloakbrowser:
     image: cloakhq/cloakbrowser:latest
-    container_name: cloakbrowser
+    container_name: cloakbrowser-9222
     command: ["cloakserve", "--headless"]
     restart: unless-stopped
+    # Bind to loopback only — the stealth browser must NOT be internet-facing.
+    # Override host port if 9222 is taken:  CLOAK_PORT=9333 docker compose up -d
     ports:
-      # Bind to loopback only — do not expose the stealth browser to the internet.
-      - "127.0.0.1:9222:9222"
+      - "${CLOAK_PORT:-127.0.0.1:9222}:9222"
     environment:
       - DISPLAY=:99
       # Optional: fetch Widevine CDM on first boot (needed for some DRM video).

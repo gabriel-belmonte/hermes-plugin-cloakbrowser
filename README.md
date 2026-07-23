@@ -8,7 +8,7 @@ CloakBrowser is a real Chromium binary with **71 fingerprint patches at the C++ 
 
 ## Features
 
-- 🛡️ **`cloak_browser` tool** — navigate / screenshot / extract / status against the local stealth Chromium over CDP.
+- 🛡️ **`cloak_browser` tool** — navigate / screenshot / status against the local stealth Chromium over CDP.
 - ⌨️ **`/cloak` command** — manage the Docker container (`/cloak up|down|status|logs`).
 - 🔌 **Optional built-in integration** — point Hermes' existing `BROWSER_CDP_URL` at CloakBrowser and the native `browser_*` tools drive it automatically.
 - 🏠 **100% local** — no cloud, no API key. Loopback-only by default.
@@ -74,7 +74,10 @@ Hermes
                               cloakhq/cloakbrowser (Docker, loopback)
 ```
 
-The plugin talks to CloakBrowser over the **Chrome DevTools Protocol** via `playwright-core` — the same protocol the built-in local browser uses, so behavior matches Hermes' native browser tooling.
+The plugin talks to CloakBrowser over the **Chrome DevTools Protocol** using
+Hermes' own `agent-browser` CLI (the same binary Hermes' native `browser_*`
+tools use). This reuses Hermes' installed browser stack — no second Playwright
+needed, and it works even on the offline-restricted venv.
 
 ## Requirements
 
