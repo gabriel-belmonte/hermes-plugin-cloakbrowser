@@ -1,0 +1,23 @@
+name: hermes-cloakbrowser
+label: CloakBrowser (Stealth Chromium)
+kind: plugin
+version: 1.0.0
+description: >-
+  Self-hosted stealth Chromium browser backend for Hermes Agent, powered by
+  CloakBrowser (CloakHQ). Provides a `cloak_browser` tool that drives a
+  fingerprint-patched Chromium (71 C++ patches, passes Cloudflare Turnstile,
+  FingerprintJS, reCAPTCHA v3) via CDP, plus a `/cloak` command to manage the
+  container and a `cloak_status` health check. Zero cloud dependency, all
+  local. Drop-in complementary to the built-in Camofox backend.
+author: gabriel-belmonte
+homepage: https://github.com/gabriel-belmonte/hermes-plugin-cloakbrowser
+requires_env: []
+optional_env:
+  - name: CLOAKBROWSER_URL
+    description: "CloakBrowser CDP endpoint (default http://127.0.0.1:9222)"
+    prompt: "CloakBrowser CDP URL"
+    password: false
+  - name: CLOAKBROWSER_HEADLESS
+    description: "Run headless (true) or headed (false). Default true."
+    prompt: "Headless?"
+    password: false

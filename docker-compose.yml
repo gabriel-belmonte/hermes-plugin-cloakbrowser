@@ -1,0 +1,16 @@
+services:
+  cloakbrowser:
+    image: cloakhq/cloakbrowser:latest
+    container_name: cloakbrowser
+    command: ["cloakserve", "--headless"]
+    restart: unless-stopped
+    ports:
+      # Bind to loopback only — do not expose the stealth browser to the internet.
+      - "127.0.0.1:9222:9222"
+    environment:
+      - DISPLAY=:99
+      # Optional: fetch Widevine CDM on first boot (needed for some DRM video).
+      # - CLOAKBROWSER_FETCH_WIDEVINE=1
+    shm_size: "2gb"
+    # Uncomment to pin a specific arch / version:
+    # platform: linux/arm64
