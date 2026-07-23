@@ -24,8 +24,9 @@ git clone https://github.com/gabriel-belmonte/hermes-plugin-cloakbrowser \
 cd ~/.hermes/plugins/hermes-plugin-cloakbrowser
 sudo docker compose up -d
 
-# 3. Verify
-curl -s http://127.0.0.1:9222/json/version
+# 3. Verify (port is auto-picked from 9222; check the container log for the port)
+sudo docker ps --filter name=cloakbrowser
+curl -s http://127.0.0.1:$(sudo docker port cloakbrowser-9223 9222/tcp | cut -d: -f2)/json/version
 
 # 4. Restart Hermes
 ```
@@ -52,10 +53,23 @@ Manage the container:
 **As the built-in browser backend** — add to `~/.hermes/.env`:
 
 ```bash
-BROWSER_CDP_URL=http://127.0.0.1:9222
+# Use the auto-picked port CloakBrowser actually bound (check: sudo docker ps --filter name=cloakbrowser)
+BROWSER_CDP_URL=http://127.0.0.1:9223
 ```
 
 Now `browser_navigate`, `browser_click`, `browser_snapshot`, … all run on the stealth Chromium. No code change.
+
+## Anti-bot test results (verified 2026-07-23)
+
+| Test | Target | Result |
+|------|--------|--------|
+| Fingerprint detection | `bot.sannysoft.com` | ✅ **All checks pass** — `WebDriver: missing (passed)`, no Phantom/Selenium flags, real `NVIDIA RTX 3080` WebGL, normal UA `Chrome/146 (Windows 10)` |
+| Cloudflare Turnstile | `nowsecure.nl` | ⚠️ Page loads (no 403 block) but the **"Verify you are human" challenge iframe appears** — manual solve or `humanize=True` + a residential proxy is required to clear Turnstile automatically |
+
+**Bottom line:** CloakBrowser defeats fingerprint/automation detection (the part
+that normally burns a bot instantly). Active challenges like Cloudflare
+Turnstile still need human-like interaction — set `humanize=True` and route
+through a residential proxy on the `cloakserve` launch flags for those.
 
 ## Config
 
@@ -68,10 +82,10 @@ Now `browser_navigate`, `browser_click`, `browser_snapshot`, … all run on the 
 
 ```
 Hermes
-  ├─ built-in browser_* tools ──► BROWSER_CDP_URL ──► CloakBrowser :9222  (option B)
-  └─ cloak_browser tool ────────► CDP ──────────────► CloakBrowser :9222  (option A)
+  ├─ built-in browser_* tools ──► BROWSER_CDP_URL ──► CloakBrowser :<auto>  (option B)
+  └─ cloak_browser tool ────────► CDP ──────────────► CloakBrowser :<auto>  (option A)
                                          ▲
-                              cloakhq/cloakbrowser (Docker, loopback)
+                              cloakhq/cloakbrowser (Docker, loopback-only)
 ```
 
 The plugin talks to CloakBrowser over the **Chrome DevTools Protocol** using
@@ -82,8 +96,9 @@ needed, and it works even on the offline-restricted venv.
 ## Requirements
 
 - Docker (rootless or `sudo docker`)
-- `playwright-core` (auto-installed on first use)
-- A running `cloakhq/cloakbrowser` container on `:9222`
+- `agent-browser` CLI — **already shipped with Hermes** (used as-is, no install needed)
+- A running `cloakhq/cloakbrowser` container (defaults to the first free loopback
+  port from `9222`; override with `CLOAKBROWSER_PORT`)
 
 ## License
 
